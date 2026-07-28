@@ -5,21 +5,13 @@ Overlay graphics item.
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import (
-    QGraphicsItem,
-    QGraphicsPixmapItem,
-)
+from PySide6.QtWidgets import QGraphicsItem, QGraphicsPixmapItem
 
 
 class OverlayItem(QGraphicsPixmapItem):
     """
     Graphics item representing the Stellarium overlay.
     """
-
-    ROTATION_STEP = 1.0
-    SCALE_STEP = 0.02
-    MIN_SCALE = 0.05
-    MAX_SCALE = 10.0
 
     def __init__(self, pixmap: QPixmap):
 
@@ -52,46 +44,32 @@ class OverlayItem(QGraphicsPixmapItem):
 
     # --------------------------------------------------
 
-    def rotate_left(self):
+    def rotate_left(self, degrees: float = 1.0):
 
-        self.rotation_angle -= self.ROTATION_STEP
+        self.rotation_angle -= degrees
         self.setRotation(self.rotation_angle)
 
     # --------------------------------------------------
 
-    def rotate_right(self):
+    def rotate_right(self, degrees: float = 1.0):
 
-        self.rotation_angle += self.ROTATION_STEP
+        self.rotation_angle += degrees
         self.setRotation(self.rotation_angle)
 
     # --------------------------------------------------
 
-    def scale_up(self):
+    def scale_up(self, amount: float = 0.02):
 
-        self.scale_factor = min(
-            self.MAX_SCALE,
-            self.scale_factor + self.SCALE_STEP,
-        )
-
+        self.scale_factor += amount
         self.setScale(self.scale_factor)
 
     # --------------------------------------------------
 
-    def scale_down(self):
+    def scale_down(self, amount: float = 0.02):
 
         self.scale_factor = max(
-            self.MIN_SCALE,
-            self.scale_factor - self.SCALE_STEP,
+            0.05,
+            self.scale_factor - amount,
         )
 
         self.setScale(self.scale_factor)
-
-    # --------------------------------------------------
-
-    def reset_transformations(self):
-
-        self.rotation_angle = 0.0
-        self.scale_factor = 1.0
-
-        self.setRotation(0.0)
-        self.setScale(1.0)
