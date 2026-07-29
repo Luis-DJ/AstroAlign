@@ -13,21 +13,22 @@ from PySide6.QtWidgets import (
 
 class OverlayItem(QGraphicsPixmapItem):
     """
-    Graphics item representing the Stellarium overlay.
+    Interactive Stellarium overlay.
+    Responsible for all overlay transformations.
     """
 
-    ROTATION_STEP = 1.0
-    SCALE_STEP = 0.02
     MIN_SCALE = 0.05
-    MAX_SCALE = 10.0
+    MAX_SCALE = 20.0
 
     def __init__(self, pixmap: QPixmap):
 
         super().__init__(pixmap)
 
-        self.setZValue(10)
+        self.rotation_angle = 0.0
+        self.scale_factor = 1.0
 
         self.setOpacity(0.50)
+        self.setZValue(10)
 
         self.setFlag(
             QGraphicsItem.ItemIsMovable,
@@ -43,50 +44,52 @@ class OverlayItem(QGraphicsPixmapItem):
             Qt.SmoothTransformation
         )
 
+        #
+        # Rotate and scale about the centre of the image.
+        #
+
         self.setTransformOriginPoint(
             self.boundingRect().center()
         )
 
-        self.rotation_angle = 0.0
-        self.scale_factor = 1.0
+    # -------------------------------------------------
+    # Rotation
+    # -------------------------------------------------
 
-    # --------------------------------------------------
+    def rotate(self, delta_degrees: float):
 
-    def rotate_left(self):
-
-        self.rotation_angle -= self.ROTATION_STEP
+        self.rotation_angle += delta_degrees
         self.setRotation(self.rotation_angle)
 
-    # --------------------------------------------------
+    # -------------------------------------------------
+    # Scaling
+    # -------------------------------------------------
 
-    def rotate_right(self):
+    def scale_by(self, factor: float):
 
-        self.rotation_angle += self.ROTATION_STEP
-        self.setRotation(self.rotation_angle)
+        new_scale = self.scale_factor * factor
 
-    # --------------------------------------------------
-
-    def scale_up(self):
-
-        self.scale_factor = min(
-            self.MAX_SCALE,
-            self.scale_factor + self.SCALE_STEP,
-        )
-
-        self.setScale(self.scale_factor)
-
-    # --------------------------------------------------
-
-    def scale_down(self):
-
-        self.scale_factor = max(
+        new_scale = max(
             self.MIN_SCALE,
-            self.scale_factor - self.SCALE_STEP,
+            min(self.MAX_SCALE, new_scale)
         )
+
+        self.scale_factor = new_scale
 
         self.setScale(self.scale_factor)
 
-    # --------------------------------------------------
+    # -------------------------------------------------
+    # Opacity
+    # -------------------------------------------------
+
+    def set_overlay_opacity(self, opacity: float):
+
+        opacity = max(0.0, min(1.0, opacity))
+        self.setOpacity(opacity)
+
+    # -------------------------------------------------
+    # Reset
+    # -------------------------------------------------
 
     def reset_transformations(self):
 
