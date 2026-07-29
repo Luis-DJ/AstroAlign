@@ -210,60 +210,70 @@ class ImageView(QGraphicsView):
 
     # --------------------------------------------------
 
-    def keyPressEvent(
-        self,
-        event: QKeyEvent,
-    ):
+    def keyPressEvent(self, event: QKeyEvent):
 
         if self.overlay_item is None:
             super().keyPressEvent(event)
             return
 
         key = event.key()
+        modifiers = event.modifiers()
+
+        #
+        # Fine / coarse increments
+        #
+
+        if modifiers & Qt.ShiftModifier:
+            rotation_step = 2.0
+            scale_factor = 1.05
+        else:
+            rotation_step = 0.2
+            scale_factor = 1.01
+
+        #
+        # Rotation
+        #
 
         if key == Qt.Key_Q:
 
-            self.overlay_item.rotate_left()
+            self.overlay_item.rotate(-rotation_step)
 
             self.status_changed.emit(
-                f"Rotation : "
-                f"{self.overlay_item.rotation_angle:.1f}°"
+                f"Rotation: {self.overlay_item.rotation_angle:.1f}°"
             )
 
             return
 
         if key == Qt.Key_E:
 
-            self.overlay_item.rotate_right()
+            self.overlay_item.rotate(rotation_step)
 
             self.status_changed.emit(
-                f"Rotation : "
-                f"{self.overlay_item.rotation_angle:.1f}°"
+                f"Rotation: {self.overlay_item.rotation_angle:.1f}°"
             )
 
             return
 
-        if key in (
-            Qt.Key_Plus,
-            Qt.Key_Equal,
-        ):
+        #
+        # Scaling
+        #
 
-            self.overlay_item.scale_up()
+        if key in (Qt.Key_Plus, Qt.Key_Equal):
+
+            self.overlay_item.scale_by(scale_factor)
 
             self.status_changed.emit(
-                f"Scale : "
-                f"{self.overlay_item.scale_factor:.2f}"
+                f"Scale: {self.overlay_item.scale_factor * 100:.1f}%"
             )
 
             return
 
         if key == Qt.Key_Minus:
 
-            self.overlay_item.scale_down()
+            self.overlay_item.scale_by(1.0 / scale_factor)
 
             self.status_changed.emit(
-                f"Scale : "
-                f"{self.overlay_item.scale_factor:.2f}"
+                f"Scale: {self.overlay_item.scale_factor * 100:.1f}%"
             )
 
             return
